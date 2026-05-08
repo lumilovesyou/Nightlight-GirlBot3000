@@ -1,0 +1,14 @@
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: black;
+        color: white;
+    }
+}
+
+.status {
+    color: var(--status-color);
+}
+
+#info p {
+    margin-left: 5%;
+}

@@ -18,6 +18,7 @@
     UPDATE_MESSAGE="New version out! Username: %u, version: %v, commands: %c"
     HELP_MESSAGE="Commands:\n%c"
     COOLDOWN=60
+    WEB_PANEL=false
     ```
 
 4. Set up the venv - `python3 -m venv venv && source venv/bin/activate`
@@ -35,5 +36,8 @@ The `.env` file has several fields to explain.
 - `UPDATE_MESSAGE` - A message similar to the above field but meant to introduce new features
 - `HELP_MESSAGE` - The reply given when a user asks for help
 - `COOLDOWN` - The time between running actions in seconds
+- `WEB_PANEL` - Whether the application opens the web control panel
 
 For the `ABOUT_MESSAGE` and `UPDATE_MESSAGE` fields there's several placeholder keys you can use. `%u` is replaced with the `USERNAME` field, `%v` is replaced with the `VERSION` field, and `%c` is replaced with the values from the COMMANDS dictionary in `index.py`. The commands will be split by newlines except in `HELP_MESSAGE` where they will be split by commas.
+
+The web control panel is still in progress, hence why it's recommended to be off by default. To access it you can find it at `http://localhost:7889/`

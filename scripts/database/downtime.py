@@ -4,10 +4,10 @@ import os
 
 class uptimeDatabase():
     def __init__(self, hbInterval, dbPath="/database/uptime.db"):
-        dbFullPath = os.getcwd() + dbPath
-        dbParentFolder = os.path.dirname(dbFullPath)
+        self.dbFullPath = os.getcwd() + dbPath
+        dbParentFolder = os.path.dirname(self.dbFullPath)
         os.makedirs(dbParentFolder, exist_ok=True)
-        self.connection = sqlite3.connect(dbFullPath)
+        self.connection = sqlite3.connect(self.dbFullPath)
         
         self.cursor = self.connection.cursor()
         self._configure()
@@ -90,13 +90,17 @@ class uptimeDatabase():
     def getWeeklyDowntime(self):
         cutoff = int(datetime.now(timezone.utc).timestamp()) - self.WEEK_SECONDS
         
-        self.cursor.execute("""
+        # New connection each time for web panel not to break thanks to threads
+        connection = sqlite3.connect(self.dbFullPath)
+        cursor = connection.cursor()
+        
+        cursor.execute("""
         SELECT COALESCE(SUM(duration), 0)
         FROM downtime
         WHERE timestamp >= ?
         """, (cutoff,))
 
-        return self.cursor.fetchone()[0]
+        return cursor.fetchone()[0]
         
     def getWeeklyUptimePercent(self):
         downtime = self.getWeeklyDowntime()

@@ -1,4 +1,5 @@
 .DS_Store
+.pid.json
 .venv
 .env*
 /logs

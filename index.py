@@ -1,13 +1,17 @@
 from dotenv import load_dotenv
 from datetime import datetime, timezone
+from pathlib import Path
+import subprocess
 import mimetypes
 import requests
 import logging
+import psutil
 import random
 import signal
 import json
 import time
 import git
+import sys
 import os
 
 from scripts.database import reminders, downtime
@@ -266,7 +270,7 @@ def shutdown(signum, frame):
     logging.info("Shutting down...")
     running = False
 
-#(Hopefully) graceful shutdown
+# (Hopefully) graceful shutdown
 signal.signal(signal.SIGINT, shutdown)
 signal.signal(signal.SIGTERM, shutdown)
 #### System management
@@ -283,16 +287,56 @@ def checkForUpdateMessage():
         createPost(formatMessage(os.getenv("UPDATE_MESSAGE")), "programming")
     if os.getenv("ABOUT_MESSAGE"):
         createPost(formatMessage(os.getenv("ABOUT_MESSAGE")), "technology", "./assets/profilePicture.png")
+        
+def closeWebPanel():
+    panelProcessDetails = json.loads(Path(".pid.json").read_text())
+    try:
+        process = psutil.Process(int(panelProcessDetails["pid"]))
+        if process.create_time() == panelProcessDetails["create_time"]:
+            process.kill()
+    except:
+        pass
 
-#Run update message info
+# Run update message info
 try:
     checkForUpdateMessage()
 except Exception as e:
     logging.error(f"Failed to check update message!\n{e}")
+
+# Launch the control panel:
+if (os.getenv("WEB_PANEL").lower() == "true"):
+    logging.info("Attempting to start control panel")
+    try:
+        # Windows
+        command = [sys.executable, "control-panel.py"]
+        if os.name == "nt":
+            proc = subprocess.Popen(
+                command,
+                creationflags=(subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP),
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+            )
+        # MacOS/Linux
+        else:
+            process = subprocess.Popen(
+                command,
+                start_new_session=True,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        panelProcessDetails = psutil.Process(process.pid)
+        Path(".pid.json").write_text(json.dumps({
+            "pid": panelProcessDetails.pid,
+            "create_time": panelProcessDetails.create_time(),
+        }))
+    except Exception as e:
+        logging.error(f"Failed to start control panel!\n{e}")
 #### Startup startup process
 
-
-#Actual bot loop
+# Actual bot loop
 while running:
     time.sleep(COOLDOWN)
     if running:
@@ -305,5 +349,9 @@ while running:
         except Exception as e:
             logging.error(f"Failed to finish commitments!\n{e}")
     uptimeDatabase.updateHeartbeat()
+    
+# Exit web panel
+logging.info("Attempting to close web panel")
+closeWebPanel()
 
 logging.info("Successfully stopped cleanly!")
