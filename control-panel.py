@@ -21,7 +21,8 @@ SESSION = requests.Session()
 # Lots of copy-pasted code from bot, will separate it out into its own file next
 # Get token
 try:
-    SESSION.post(f"{SITE}account/login", data={"loginusername": USERNAME, "loginpassword": os.getenv("PASSWORD")})
+    headers = {"Origin": "https://nightlightapp.net", "Referer": "https://nightlightapp.net/account/login"}
+    SESSION.post(f"{API_POINT}auth/loginWithPassword", headers=headers, json={"username": USERNAME, "password": os.getenv("PASSWORD")})
     if SESSION.cookies.get_dict()["username"] != USERNAME:
         exit()
 except Exception as e:

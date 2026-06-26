@@ -73,7 +73,7 @@ except:
 try:
     logging.info("Attempting to get key")
     headers = {"Origin": "https://nightlightapp.net", "Referer": "https://nightlightapp.net/account/login"}
-    thingie = SESSION.post(f"{API_POINT}auth/loginWithPassword", headers=headers, json={"username": USERNAME, "password": os.getenv("PASSWORD")})
+    SESSION.post(f"{API_POINT}auth/loginWithPassword", headers=headers, json={"username": USERNAME, "password": os.getenv("PASSWORD")})
     if SESSION.cookies.get_dict()["username"] != USERNAME:
         logging.fatal("Failed to get token!")
         exit()
