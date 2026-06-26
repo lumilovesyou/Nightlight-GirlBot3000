@@ -72,12 +72,14 @@ except:
 # Get token
 try:
     logging.info("Attempting to get key")
-    SESSION.post(f"{SITE}account/login", data={"loginusername": USERNAME, "loginpassword": os.getenv("PASSWORD")})
+    headers = {"Origin": "https://nightlightapp.net", "Referer": "https://nightlightapp.net/account/login"}
+    thingie = SESSION.post(f"{API_POINT}auth/loginWithPassword", headers=headers, json={"username": USERNAME, "password": os.getenv("PASSWORD")})
     if SESSION.cookies.get_dict()["username"] != USERNAME:
         logging.fatal("Failed to get token!")
         exit()
 except Exception as e:
     logging.fatal(f"Failed to get token!\n{e}")    
+    exit()
 
 # Invalidate the previous token (probably a really gross way to do this but I couldn't find an endpoint to grab tokens from)
 try:

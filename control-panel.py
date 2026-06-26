@@ -30,6 +30,7 @@ except Exception as e:
 def colouredByPercent(value):
     try:
         value = int(value)
+        # Hardcoded because I hate you, the user, in specific <3
         if value > 99:
             return "green"
         if value > 90:
